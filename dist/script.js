@@ -10,14 +10,23 @@ $('.login').on('submit', function (e) {
   $this.addClass('loading');
   $state.html('Vérification');
   setTimeout(function () {
-    isValid(contact);
-    $state.html(contact.serie + ' - ' + contact.number + ' - ' + contact.type);
-    $this.addClass('ok');
-    setTimeout(function () {
-      $state.html('Migrer');
-      $this.removeClass('ok loading');
-      working = false;
-    }, 4000);
+    if(isValid(contact)){
+      $state.html(contact.serie + ' - ' + contact.number + ' - ' + contact.type);
+      $this.addClass('ok');
+      setTimeout(function () {
+        $state.html('Migrer');
+        $this.removeClass('ok loading');
+        working = false;
+      }, 4000);
+    } else {
+      $state.html('Numéro non-valide');
+      $this.addClass('nok');
+      setTimeout(function () {
+        $state.html('Migrer');
+        $this.removeClass('nok loading');
+        working = false;
+      }, 4000);
+    }
   }, 3000);
   console.log(contact);
 });
@@ -52,6 +61,7 @@ function isValid(contact) {
     } else {
       contact.type = "mobile";
     }
+    return true;
   } else if (maskNumb12.test(contact.number) && contact.number.startsWith('+225')) {
     contact.serie = 2;
     checkNumber = contact.number.substr(4);
@@ -60,6 +70,7 @@ function isValid(contact) {
     } else {
       contact.type = "mobile";
     }
+    return true;
   } else if (maskNumb13.test(contact.number) && contact.number.startsWith('00225')) {
     contact.serie = 3
     checkNumber = contact.number.substr(5);
@@ -68,14 +79,9 @@ function isValid(contact) {
     } else {
       contact.type = "mobile";
     }
+    return true;
   } else {
-    contact.serie = false
-  }
-
-  if (contact.serie == false) {
-    return "Numéro non-valide";
-  } else {
-    return contact.serie;
+    return false
   }
 }
 
