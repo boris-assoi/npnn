@@ -11,11 +11,29 @@ $('.login').on('submit', function (e) {
   $state.html('Vérification');
   setTimeout(function () {
     if (phoneChanger(contact)) {
-      $state.html(contact.number + ' - ' + contact.carrier);
-      $this.addClass('ok');
+      var carrierClass = "";
+      switch (contact.carrier) {
+        case 'ORANGE':
+          carrierClass = 'orange';
+          break;
+
+        case 'MTN':
+          carrierClass = 'mtn';
+          break;
+
+        case 'MOOV':
+          carrierClass = 'moov';
+          break;
+
+        default:
+          break;
+      }
+      $state.html(contact.number);
+      $this.addClass(carrierClass);
       setTimeout(function () {
         $state.html('Migrer');
-        $this.removeClass('ok loading');
+        $this.removeClass(carrierClass);
+        $this.removeClass('loading');
         working = false;
       }, 4000);
     } else {
@@ -164,25 +182,25 @@ function phoneChanger(phone) {
 function migrate(phone) {
   switch (phone.carrier) {
     case 'ORANGE':
-      if(phone.serie == 1) {
-        if(phone.type == 'fixe') {
+      if (phone.serie == 1) {
+        if (phone.type == 'fixe') {
           phone.number = '27' + phone.number;
-        } else if(phone.type == 'mobile') {
+        } else if (phone.type == 'mobile') {
           phone.number = '07' + phone.number;
         }
-      } else if(phone.serie == 2) {
-        if(phone.type == 'fixe') {
+      } else if (phone.serie == 2) {
+        if (phone.type == 'fixe') {
           number = phone.number.substr(4)
           phone.number = '+22527' + number;
-        } else if(phone.type == 'mobile') {
+        } else if (phone.type == 'mobile') {
           number = phone.number.substr(4)
           phone.number = '+22507' + number;
         }
-      } else if(phone.serie == 3) {
-        if(phone.type == 'fixe') {
+      } else if (phone.serie == 3) {
+        if (phone.type == 'fixe') {
           number = phone.number.substr(5)
           phone.number = '0022527' + number;
-        } else if(phone.type == 'mobile') {
+        } else if (phone.type == 'mobile') {
           number = phone.number.substr(5)
           phone.number = '0022507' + number;
         }
@@ -190,25 +208,25 @@ function migrate(phone) {
       break;
 
     case 'MTN':
-      if(phone.serie == 1) {
-        if(phone.type == 'fixe') {
+      if (phone.serie == 1) {
+        if (phone.type == 'fixe') {
           phone.number = '25' + phone.number;
-        } else if(phone.type == 'mobile') {
+        } else if (phone.type == 'mobile') {
           phone.number = '05' + phone.number;
         }
-      } else if(phone.serie == 2) {
-        if(phone.type == 'fixe') {
+      } else if (phone.serie == 2) {
+        if (phone.type == 'fixe') {
           number = phone.number.substr(4)
           phone.number = '+22525' + number;
-        } else if(phone.type == 'mobile') {
+        } else if (phone.type == 'mobile') {
           number = phone.number.substr(4)
           phone.number = '+22505' + number;
         }
-      } else if(phone.serie == 3) {
-        if(phone.type == 'fixe') {
+      } else if (phone.serie == 3) {
+        if (phone.type == 'fixe') {
           number = phone.number.substr(5)
           phone.number = '0022525' + number;
-        } else if(phone.type == 'mobile') {
+        } else if (phone.type == 'mobile') {
           number = phone.number.substr(5)
           phone.number = '0022505' + number;
         }
@@ -216,31 +234,31 @@ function migrate(phone) {
       break;
 
     case 'MOOV':
-      if(phone.serie == 1) {
-        if(phone.type == 'fixe') {
+      if (phone.serie == 1) {
+        if (phone.type == 'fixe') {
           phone.number = '21' + phone.number;
-        } else if(phone.type == 'mobile') {
+        } else if (phone.type == 'mobile') {
           phone.number = '01' + phone.number;
         }
-      } else if(phone.serie == 2) {
-        if(phone.type == 'fixe') {
+      } else if (phone.serie == 2) {
+        if (phone.type == 'fixe') {
           number = phone.number.substr(4)
           phone.number = '+22521' + number;
-        } else if(phone.type == 'mobile') {
+        } else if (phone.type == 'mobile') {
           number = phone.number.substr(4)
           phone.number = '+22501' + number;
         }
-      } else if(phone.serie == 3) {
-        if(phone.type == 'fixe') {
+      } else if (phone.serie == 3) {
+        if (phone.type == 'fixe') {
           number = phone.number.substr(5)
           phone.number = '0022521' + number;
-        } else if(phone.type == 'mobile') {
+        } else if (phone.type == 'mobile') {
           number = phone.number.substr(5)
           phone.number = '0022501' + number;
         }
       }
       break;
-  
+
     default:
       break;
   }

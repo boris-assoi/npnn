@@ -60,6 +60,15 @@ body {
 .login.nok button{
   background-color: red;
 }
+.login.orange button{
+  background-color: orange;
+}
+.login.mtn button{
+  background-color: yellow;
+}
+.login.moov button{
+  background-color: green;
+}
 .login input {
   display: block;
   padding: 15px 10px;
@@ -158,4 +167,8 @@ footer {
 footer a, footer a:link {
   color: #fff;
   text-decoration: none;
+}
+
+form {
+  font-family: 'Segoe-Ui';
 }
