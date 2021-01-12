@@ -77,12 +77,10 @@ function isValid(contact) {
     return true;
   } else if (maskNumb12.test(contact.number) && contact.number.startsWith('+225')) {
     contact.serie = 2;
-    checkNumber = contact.number.substr(4);
     setType(contact);
     return true;
   } else if (maskNumb13.test(contact.number) && contact.number.startsWith('00225')) {
     contact.serie = 3
-    checkNumber = contact.number.substr(5);
     setType(contact);
     return true;
   } else {
@@ -95,7 +93,23 @@ function isValid(contact) {
  * @param {Contact} phone 
  */
 function setType(phone) {
-  if (maskFixNumber.test(phone.number)) {
+  switch (phone.serie) {
+    case 1:
+      baseNumber = phone.number;
+      break;
+  
+    case 2:
+      baseNumber = phone.number.substr(4);
+      break;
+  
+    case 1:
+      baseNumber = phone.number.substr(5);
+      break;
+  
+    default:
+      break;
+  }
+  if (maskFixNumber.test(baseNumber)) {
     phone.type = "fixe";
   } else {
     phone.type = "mobile";
