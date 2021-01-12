@@ -10,8 +10,8 @@ $('.login').on('submit', function (e) {
   $this.addClass('loading');
   $state.html('Vérification');
   setTimeout(function () {
-    if(isValid(contact)){
-      $state.html(contact.serie + ' - ' + contact.number + ' - ' + contact.type);
+    if (phoneChanger(contact)) {
+      $state.html(contact.number + ' - ' + contact.carrier);
       $this.addClass('ok');
       setTimeout(function () {
         $state.html('Migrer');
@@ -41,49 +41,211 @@ class Contact {
   }
 }
 
+let maskNumb8 = /^\d{8,8}$/; // Masque pour déterminer si nous n'avons que 8 caractères qui ne sont que des chiffres;
+let maskNumb12 = /^\+\d{11,11}$/; // Masque pour déterminer si nous n'avons que 8 caractères qui ne sont que des chiffres;
+let maskNumb13 = /^\d{13,13}$/; // Masque pour déterminer si nous n'avons que 8 caractères qui ne sont que des chiffres;
+let maskFixNumber = /^(2|3)/; // Masque pour les numéros fixes
+
 /**
- * 
+ * Vérifie si le contact saisi est valide
  * @param {Contact} contact 
  */
 function isValid(contact) {
   contact.number = contact.number.replace(/[- ]/g, ''); // Retrait des espaces et des tirets du numéro de téléphone
 
-  let maskNumb8 = /^\d{8,8}$/; // Masque pour déterminer si nous n'avons que 8 caractères qui ne sont que des chiffres;
-  let maskNumb12 = /^\+\d{11,11}$/; // Masque pour déterminer si nous n'avons que 8 caractères qui ne sont que des chiffres;
-  let maskNumb13 = /^\d{13,13}$/; // Masque pour déterminer si nous n'avons que 8 caractères qui ne sont que des chiffres;
-
-  let maskFixNumber = /^(2|3)/; // Masque pour les numéros fixes
-
   if (maskNumb8.test(contact.number)) {
     contact.serie = 1;
-    if(maskFixNumber.test(contact.number)){
-      contact.type = "fixe";
-    } else {
-      contact.type = "mobile";
-    }
+    setType(contact);
     return true;
   } else if (maskNumb12.test(contact.number) && contact.number.startsWith('+225')) {
     contact.serie = 2;
     checkNumber = contact.number.substr(4);
-    if(maskFixNumber.test(checkNumber)){
-      contact.type = "fixe";
-    } else {
-      contact.type = "mobile";
-    }
+    setType(contact);
     return true;
   } else if (maskNumb13.test(contact.number) && contact.number.startsWith('00225')) {
     contact.serie = 3
     checkNumber = contact.number.substr(5);
-    if(maskFixNumber.test(checkNumber)){
-      contact.type = "fixe";
-    } else {
-      contact.type = "mobile";
-    }
+    setType(contact);
     return true;
   } else {
     return false
   }
 }
+
+/**
+ * Ajoute le type du contact
+ * @param {Contact} phone 
+ */
+function setType(phone) {
+  if (maskFixNumber.test(phone.number)) {
+    phone.type = "fixe";
+  } else {
+    phone.type = "mobile";
+  }
+}
+
+/**
+ * Retourne l'opérateur téléphonique
+ * @param {Contact} phone le contact téléphonique
+ */
+function setCarrier(phone) {
+  prefix = getPrefix(phone);
+  if (jQuery.inArray(prefix, carriersPrefix.ORANGE.mobile) != -1 || jQuery.inArray(prefix, carriersPrefix.ORANGE.fixe) != -1) {
+    phone.carrier = "ORANGE";
+  }
+  if (jQuery.inArray(prefix, carriersPrefix.MTN.mobile) != -1 || jQuery.inArray(prefix, carriersPrefix.MTN.fixe) != -1) {
+    phone.carrier = "MTN";
+  }
+  if (jQuery.inArray(prefix, carriersPrefix.MOOV.mobile) != -1 || jQuery.inArray(prefix, carriersPrefix.MOOV.fixe) != -1) {
+    phone.carrier = "MOOV";
+  }
+}
+
+/**
+ * Retourne le préfix du téléphone
+ * @param {Contact} phone le contact téléphonique
+ */
+function getPrefix(phone) {
+  if (phone.type == 'mobile') {
+    switch (phone.serie) {
+      case 1:
+        return phone.number.substr(0, 2);
+        break;
+
+      case 2:
+        return phone.number.substr(4, 2);
+        break;
+
+      case 3:
+        return phone.number.substr(5, 2);
+        break;
+
+      default:
+        break;
+    }
+  }
+  if (phone.type == 'fixe') {
+    switch (phone.serie) {
+      case 1:
+        return phone.number.substr(0, 3);
+        break;
+
+      case 2:
+        return phone.number.substr(4, 3);
+        break;
+
+      case 3:
+        return phone.number.substr(5, 3);
+        break;
+
+      default:
+        return false;
+        break;
+    }
+  }
+
+  return prefix;
+}
+
+function phoneChanger(phone) {
+  if (isValid(phone)) {
+    setCarrier(phone);
+    migrate(phone);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+/**
+ * Réalise la migration du contact
+ * @param {Contact} phone 
+ */
+function migrate(phone) {
+  switch (phone.carrier) {
+    case 'ORANGE':
+      if(phone.serie == 1) {
+        if(phone.type == 'fixe') {
+          phone.number = '27' + phone.number;
+        } else if(phone.type == 'mobile') {
+          phone.number = '07' + phone.number;
+        }
+      } else if(phone.serie == 2) {
+        if(phone.type == 'fixe') {
+          number = phone.number.substr(4)
+          phone.number = '+22527' + number;
+        } else if(phone.type == 'mobile') {
+          number = phone.number.substr(4)
+          phone.number = '+22507' + number;
+        }
+      } else if(phone.serie == 3) {
+        if(phone.type == 'fixe') {
+          number = phone.number.substr(5)
+          phone.number = '0022527' + number;
+        } else if(phone.type == 'mobile') {
+          number = phone.number.substr(5)
+          phone.number = '0022507' + number;
+        }
+      }
+      break;
+
+    case 'MTN':
+      if(phone.serie == 1) {
+        if(phone.type == 'fixe') {
+          phone.number = '25' + phone.number;
+        } else if(phone.type == 'mobile') {
+          phone.number = '05' + phone.number;
+        }
+      } else if(phone.serie == 2) {
+        if(phone.type == 'fixe') {
+          number = phone.number.substr(4)
+          phone.number = '+22525' + number;
+        } else if(phone.type == 'mobile') {
+          number = phone.number.substr(4)
+          phone.number = '+22505' + number;
+        }
+      } else if(phone.serie == 3) {
+        if(phone.type == 'fixe') {
+          number = phone.number.substr(5)
+          phone.number = '0022525' + number;
+        } else if(phone.type == 'mobile') {
+          number = phone.number.substr(5)
+          phone.number = '0022505' + number;
+        }
+      }
+      break;
+
+    case 'MOOV':
+      if(phone.serie == 1) {
+        if(phone.type == 'fixe') {
+          phone.number = '21' + phone.number;
+        } else if(phone.type == 'mobile') {
+          phone.number = '01' + phone.number;
+        }
+      } else if(phone.serie == 2) {
+        if(phone.type == 'fixe') {
+          number = phone.number.substr(4)
+          phone.number = '+22521' + number;
+        } else if(phone.type == 'mobile') {
+          number = phone.number.substr(4)
+          phone.number = '+22501' + number;
+        }
+      } else if(phone.serie == 3) {
+        if(phone.type == 'fixe') {
+          number = phone.number.substr(5)
+          phone.number = '0022521' + number;
+        } else if(phone.type == 'mobile') {
+          number = phone.number.substr(5)
+          phone.number = '0022501' + number;
+        }
+      }
+      break;
+  
+    default:
+      break;
+  }
+}
+
 
 let carriersPrefix = {
   "ORANGE": {
